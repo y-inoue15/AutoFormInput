@@ -13,9 +13,9 @@ jobs:
     steps:
       - name: Generate release tag
         id: release_tag
-        run: |
-          today=$(date +'%Y.%m.%d')
-          echo "::set-output name=release_tag::$today"
+        env:
+          TZ: 'Asia/Tokyo'
+        run: echo "nowDATE=$(date +'%Y-%m-%d_%H:%M:%S')" >> $GITHUB_ENV
 
       - uses: actions/checkout@v3
       - name: ci
@@ -23,7 +23,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Zip output
-        run: zip -r ${{ steps.release_tag.outputs.VERSION }}.zip dist
+        run: zip -r ${{ env.nowDATE }}.zip dist
 
       - name: Create Release
         id: create_release
@@ -43,6 +43,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ steps.release_tag.outputs.VERSION }}.zip
-          asset_name: ${{ steps.release_tag.outputs.VERSION }}.zip
+          asset_path: ./${{ env.nowDATE }}.zip
+          asset_name: ${{ env.nowDATE }}.zip
           asset_content_type: application/zip
