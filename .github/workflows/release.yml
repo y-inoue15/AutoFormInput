@@ -2,8 +2,7 @@ name: build and release
 
 on:
   push:
-    tags:
-      - 'release-v*'
+    branches: [main]
 
 jobs:
   release:
@@ -12,9 +11,11 @@ jobs:
       version: ${{ steps.step_version.outputs.version }}
       upload_url: ${{ steps.step_upload_url.outputs.upload_url }}
     steps:
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+      - name: Generate release tag
+        id: release_tag
+        run: |
+          today=$(date +'%Y.%m.%d')
+          echo "::set-output name=release_tag::$today"
 
       - uses: actions/checkout@v3
       - name: ci
@@ -22,7 +23,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Zip output
-        run: zip -r ${{ steps.get_version.outputs.VERSION }}.zip dist
+        run: zip -r ${{ steps.release_tag.outputs.VERSION }}.zip dist
 
       - name: Create Release
         id: create_release
@@ -42,6 +43,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ steps.get_version.outputs.VERSION }}.zip
-          asset_name: ${{ steps.get_version.outputs.VERSION }}.zip
+          asset_path: ./${{ steps.release_tag.outputs.VERSION }}.zip
+          asset_name: ${{ steps.release_tag.outputs.VERSION }}.zip
           asset_content_type: application/zip
