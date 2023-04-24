@@ -1,0 +1,47 @@
+name: build and release
+
+on:
+  push:
+    tags:
+      - 'release-v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.step_version.outputs.version }}
+      upload_url: ${{ steps.step_upload_url.outputs.upload_url }}
+    steps:
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+
+      - uses: actions/checkout@v3
+      - name: ci
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Zip output
+        run: zip -r ${{ steps.get_version.outputs.VERSION }}.zip dist
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.get_version.outputs.VERSION }}.zip
+          asset_name: ${{ steps.get_version.outputs.VERSION }}.zip
+          asset_content_type: application/zip
