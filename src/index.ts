@@ -1,6 +1,6 @@
-import { createButton, createInputCheck } from './components'
-import { storageKey, targetTag } from './constants'
-import { getFormValSet, setFormVal } from './functions'
+import { createButton, createText } from './components'
+import { storageKey, storageKey2, targetTag } from './constants'
+import { getFormValSet, setFormVal, saveAutoSelectedLabel, getSavedLabel } from './functions'
 
 /**
  * メイン関数
@@ -14,12 +14,13 @@ function main() {
   })
   const setButton = createButton('set-form', '読み込み', () => {
     setFormVal(storageKey)
-    alert('読み込みが完了しました。')
   })
-  const check = createInputCheck('switch', 'json?')
   divElement.appendChild(getButton)
   divElement.appendChild(setButton)
-  divElement.appendChild(check)
+  saveAutoSelectedLabel(storageKey2)
+  const beforeSelected = getSavedLabel(storageKey2)
+  const textElement = createText('before-selected', beforeSelected ?? '')
+  divElement.appendChild(textElement)
   divElement.setAttribute('id', 'contents')
   if (body) {
     body.appendChild(divElement)

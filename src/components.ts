@@ -28,3 +28,15 @@ export const createInputCheck = (id: string, label: string): HTMLLabelElement =>
   inputLabelElement.appendChild(inputElement)
   return inputLabelElement
 }
+
+/**
+ * テキスト要素を作成します
+ * @param id ID セレクター
+ * @param text テキスト
+ */
+export const createText = (id: string, text: string): HTMLSpanElement => {
+  const spanElement: HTMLSpanElement = document.createElement('span')
+  spanElement.textContent = text
+  spanElement.setAttribute('id', id)
+  return spanElement
+}
